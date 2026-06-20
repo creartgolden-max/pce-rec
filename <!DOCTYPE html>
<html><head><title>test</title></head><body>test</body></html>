@@ -340,22 +340,22 @@ const blockA=[
 /* ---- BLOQUE B · 16 procesos (SGC 50% + 15 procesos 50%) ---- */
 const PW2=+(24.5/15).toFixed(4);
 const PROC=[
-  {id:'sgc', nm:'SGC — Sistema de Gestión de Calidad', coord:'Coord. SGC', coordId:'coord_sgc', w:24.5, blk:'B1'},
-  {id:'credito_cobranza', nm:'Crédito y Cobranza', coord:'Coord. Crédito y Cobranza', coordId:'coord_credito', w:PW2, blk:'B2'},
-  {id:'compras', nm:'Compras', coord:'Coord. Compras', coordId:'coord_compras', w:PW2, blk:'B2'},
-  {id:'ventas', nm:'Ventas', coord:'Coord. Ventas', coordId:'coord_ventas', w:PW2, blk:'B2'},
-  {id:'rh', nm:'Recursos Humanos', coord:'Coord. RH', coordId:'coord_rh', w:PW2, blk:'B2'},
-  {id:'seguridad_5s', nm:'Seguridad e Higiene y 5S', coord:'Coord. CMSH / 5S', coordId:'coord_seguridad', w:PW2, blk:'B2'},
-  {id:'aduana', nm:'Aduana de Apoyo a Ventas', coord:'Coord. Aduana', coordId:'coord_aduana', w:PW2, blk:'B2'},
-  {id:'logistica', nm:'Logística', coord:'Coord. Logística', coordId:'coord_logistica', w:PW2, blk:'B2'},
-  {id:'pcp_lc', nm:'PCP LC', coord:'Coord. PCP LC', coordId:'coord_pcp_lc', w:PW2, blk:'B2'},
-  {id:'pcp_rc', nm:'PCP RC', coord:'Coord. PCP RC', coordId:'coord_pcp_rc', w:PW2, blk:'B2'},
-  {id:'prod_lc', nm:'Producción LC', coord:'Coord. Producción LC', coordId:'coord_prod_lc', w:PW2, blk:'B2'},
-  {id:'prod_rc', nm:'Producción RC', coord:'Coord. Producción RC', coordId:'coord_prod_rc', w:PW2, blk:'B2'},
-  {id:'lab_cc', nm:'Lab. Control de Calidad', coord:'Coord. Lab. C. Calidad', coordId:'coord_lab_cc', w:PW2, blk:'B2'},
-  {id:'lab_igual', nm:'Lab. Igualación', coord:'Coord. Lab. Igualación', coordId:'coord_lab_igual', w:PW2, blk:'B2'},
-  {id:'diseno', nm:'Diseño y Desarrollo', coord:'Coord. Diseño y Desarrollo', coordId:'coord_diseno', w:PW2, blk:'B2'},
-  {id:'almacen_rc', nm:'Almacén RC', coord:'Coord. Almacén RC', coordId:'coord_almacen_rc', w:PW2, blk:'B2'},
+  {id:'sgc', nm:'SGC — Sistema de Gestión de Calidad', coord:'Coord. SGC', w:24.5, blk:'B1'},
+  {id:'credito_cobranza', nm:'Crédito y Cobranza', coord:'Coord. Crédito y Cobranza', w:PW2, blk:'B2'},
+  {id:'compras', nm:'Compras', coord:'Coord. Compras', w:PW2, blk:'B2'},
+  {id:'ventas', nm:'Ventas', coord:'Coord. Ventas', w:PW2, blk:'B2'},
+  {id:'rh', nm:'Recursos Humanos', coord:'Coord. RH', w:PW2, blk:'B2'},
+  {id:'seguridad_5s', nm:'Seguridad e Higiene y 5S', coord:'Coord. CMSH / 5S', w:PW2, blk:'B2'},
+  {id:'aduana', nm:'Aduana de Apoyo a Ventas', coord:'Coord. Aduana', w:PW2, blk:'B2'},
+  {id:'logistica', nm:'Logística', coord:'Coord. Logística', w:PW2, blk:'B2'},
+  {id:'pcp_lc', nm:'PCP LC', coord:'Coord. PCP LC', w:PW2, blk:'B2'},
+  {id:'pcp_rc', nm:'PCP RC', coord:'Coord. PCP RC', w:PW2, blk:'B2'},
+  {id:'prod_lc', nm:'Producción LC', coord:'Coord. Producción LC', w:PW2, blk:'B2'},
+  {id:'prod_rc', nm:'Producción RC', coord:'Coord. Producción RC', w:PW2, blk:'B2'},
+  {id:'lab_cc', nm:'Lab. Control de Calidad', coord:'Coord. Lab. C. Calidad', w:PW2, blk:'B2'},
+  {id:'lab_igual', nm:'Lab. Igualación', coord:'Coord. Lab. Igualación', w:PW2, blk:'B2'},
+  {id:'diseno', nm:'Diseño y Desarrollo', coord:'Coord. Diseño y Desarrollo', w:PW2, blk:'B2'},
+  {id:'almacen_rc', nm:'Almacén RC', coord:'Coord. Almacén RC', w:PW2, blk:'B2'},
 ];
 // estado por proceso: {kpi, efp, cultura, resultado, completo, faltan[]}
 PROC.forEach(p=>{ p.kpi=null; p.efp=null; p.cultura=null; p.resultado=null; p.completo=false; p.faltan=[]; });
@@ -374,61 +374,55 @@ async function loadAll(){
   if(!db) return;
   document.getElementById('compBar').textContent='Leyendo datos del periodo '+PERIODO+'…';
   try{
-    const [gprRes, revRes, cultRes, manRes] = await Promise.all([
+    const [gprRes, revRes, cultRes, procRes, efpRes, cultColabRes, manRes] = await Promise.all([
       db.from('gpr_projects').select('hitos'),
-      db.from('rev_revisiones').select('proceso_id,kpi,efp').eq('periodo',PERIODO),
+      db.from('rev_revisiones').select('proceso_id,kpi').eq('periodo',PERIODO),
       db.from('cult_evaluaciones').select('colaborador_id,resultado').eq('periodo',PERIODO),
+      db.from('rev_procesos').select('id,coordinador_id'),
+      db.from('efp_eficiencia').select('persona_id,resultado').eq('periodo',PERIODO),
+      db.from('cult_colaboradores').select('id,efp_persona_id'),
       db.from('pce_manual').select('*').eq('colaborador_id',COLAB).eq('periodo',PERIODO).maybeSingle()
     ]);
-    for(const r of [gprRes,revRes,cultRes]) if(r.error) throw r.error;
-    // pce_manual: si la tabla no existe aún, no romper (avisar)
+    for(const r of [gprRes,revRes,cultRes,procRes,efpRes,cultColabRes]) if(r.error) throw r.error;
     let manRow=null;
     if(manRes.error){ console.warn('pce_manual:', manRes.error.message); }
     else manRow=manRes.data;
-
-    // --- Bloque A · fuentes ---
-    // 1) Proyectos Especiales (gpr): avance global = promedio de hitos hechos
     const projs=gprRes.data||[]; const progs=[];
     projs.forEach(pr=>{ const h=Array.isArray(pr.hitos)?pr.hitos:[]; if(h.length) progs.push(Math.round(h.filter(x=>x.hecho).length/h.length*100)); });
     const gprAvance = progs.length? Math.round(progs.reduce((a,b)=>a+b,0)/progs.length) : null;
-
-    // 4) Apego cultura (cult): resultado de Alma este periodo
     const cultMap={}; (cultRes.data||[]).forEach(r=>{ cultMap[r.colaborador_id]=r.resultado; });
     const almaCult = (cultMap[COLAB]!=null)? cultMap[COLAB] : null;
-
-    // 5) Revisiones (derivado): cumplido si el triage del mes tiene datos (algún proceso con kpi)
     const revRows=revRes.data||[];
     const triageCapturado = revRows.some(r=>r.kpi!=null);
     const revCheck = revRows.length? (triageCapturado?100:0) : null;
-
-    // manual (pce_manual)
     manual.kpi_puesto = manRow? (manRow.kpi_puesto!=null?manRow.kpi_puesto:null) : null;
     manual.kpi_alta   = manRow? (manRow.kpi_alta_direccion!=null?manRow.kpi_alta_direccion:null) : null;
     manual.libro      = manRow? !!manRow.libro_hecho : null;
-
-    // asignar s a cada item de Bloque A
     blockA[0].s = manual.kpi_puesto;
     blockA[1].s = gprAvance;
     blockA[2].s = manual.kpi_alta;
     blockA[3].s = almaCult;
     blockA[4].s = revCheck;
     blockA[5].s = (manual.libro==null)? null : (manual.libro?100:0);
-
-    // --- Bloque B · por proceso ---
     const revMap={}; revRows.forEach(r=>{ revMap[r.proceso_id]=r; });
+    const procCoord={}; (procRes.data||[]).forEach(r=>{ procCoord[r.id]=r.coordinador_id; });
+    const efpMap={}; (efpRes.data||[]).forEach(r=>{ efpMap[r.persona_id]=r.resultado; });
+    const cultColabByEfp={}; (cultColabRes.data||[]).forEach(r=>{ if(r.efp_persona_id!=null) cultColabByEfp[r.efp_persona_id]=r.id; });
     PROC.forEach(p=>{
       const rv=revMap[p.id]||{};
+      const coordId = procCoord[p.id];
       p.kpi = (rv.kpi!=null)? Number(rv.kpi) : null;
-      p.efp = (rv.efp!=null)? Number(rv.efp) : null;
-      p.cultura = (cultMap[p.coordId]!=null)? Number(cultMap[p.coordId]) : null;
+      p.efp = (coordId!=null && efpMap[coordId]!=null)? Number(efpMap[coordId]) : null;
+      const cultColabId = (coordId!=null)? cultColabByEfp[coordId] : null;
+      p.cultura = (cultColabId!=null && cultMap[cultColabId]!=null)? Number(cultMap[cultColabId]) : null;
       p.faltan=[];
       if(p.kpi==null) p.faltan.push('KPI');
       if(p.efp==null) p.faltan.push('Desempeño');
       if(p.cultura==null) p.faltan.push('Cultura del comité');
       p.completo = (p.faltan.length===0);
-      p.resultado = p.completo ? (p.kpi*0.5 + p.efp*0.25 + p.cultura*0.25) : null;
+      if(p.completo){ const efCoord = p.efp*0.5 + p.cultura*0.5; p.efCoord = efCoord; p.resultado = p.kpi*0.5 + efCoord*0.5; }
+      else { p.efCoord = null; p.resultado = null; }
     });
-
     renderA(); renderB(); recalc(); renderPareto();
     document.getElementById('sessPill').textContent='en vivo';
   }catch(err){
@@ -437,170 +431,6 @@ async function loadAll(){
     toast('Error al leer datos: '+(err.message||err),'err');
   }
 }
-
-/* =====================================================================
-   RENDER
-   ===================================================================== */
-function renderA(){
-  const el=document.getElementById('listA'); el.innerHTML='';
-  blockA.forEach((it,i)=>{
-    const row=document.createElement('div'); row.className='item';
-    let scCell;
-    const pend = (it.s==null);
-    if(it.src==='manual_kpi' || it.src==='manual_alta'){
-      const key = it.src==='manual_kpi'?'kpi_puesto':'kpi_alta';
-      scCell = `<div class="sc"><input type="number" min="0" max="100" placeholder="—" value="${it.s==null?'':it.s}" data-man="${key}"><span class="dot" style="background:${it.s==null?'var(--line)':color(it.s)}"></span></div>`;
-    } else if(it.src==='manual_libro'){
-      const on = it.s===100;
-      scCell = `<div class="sc"><button class="chk ${on?'on':''}" data-man="libro">${on?'✓ Cumplido':(it.s===0?'✗ Pendiente':'— Sin marcar')}</button></div>`;
-    } else {
-      // read-only
-      scCell = pend
-        ? `<div class="sc"><span class="pend">⏳ pendiente</span></div>`
-        : `<div class="sc"><span class="rd" style="color:${color(it.s)}">${Math.round(it.s)}%</span><span class="dot" style="background:${color(it.s)}"></span></div>`;
-    }
-    const tag = (it.src.startsWith('manual'))
-      ? `<span class="src-tag man">captura manual</span>`
-      : `<span class="src-tag">${it.src==='gpr'?'lee · Gestor':it.src==='cult'?'lee · Cultura':'lee · Revisiones'}</span>`;
-    row.innerHTML = `
-      <div class="nm">${it.nm}<small>${it.sub}</small>${tag}</div>
-      <div class="wt"><label>Peso</label><span class="wv">${it.w}</span></div>
-      ${scCell}`;
-    el.appendChild(row);
-  });
-}
-
-function procRow(p){
-  const row=document.createElement('div'); row.className='pitem'+(p.completo?'':' incompleto');
-  let resCell;
-  if(p.completo){
-    resCell = `<div style="text-align:right"><div class="pwt">Resultado</div><div class="rv" style="color:${color(p.resultado)}">${Math.round(p.resultado)}%</div></div>`;
-  } else {
-    resCell = `<div style="text-align:right"><div class="pwt">Estado</div><div class="pendtag">⏳ Pendiente</div></div>`;
-  }
-  const det = p.completo
-    ? `KPI <b>${Math.round(p.kpi)}</b> · Desempeño <b>${Math.round(p.efp)}</b> · Cultura <b>${Math.round(p.cultura)}</b>`
-    : `Falta: <b>${p.faltan.join(' · ')}</b>`;
-  row.innerHTML = `
-    <div class="ptop">
-      <div class="pnm">${p.nm}<small>Coordina: ${p.coord}</small></div>
-      <div class="pres">
-        <div style="text-align:right"><div class="pwt">Peso</div><div class="pwt" style="color:var(--ink);font-family:Georgia,serif;font-size:14px">${p.w}</div></div>
-        ${resCell}
-      </div>
-    </div>
-    <div class="pdet">${det}</div>`;
-  return row;
-}
-function renderB(){
-  const b1=document.getElementById('listB1'); b1.innerHTML='';
-  const b2=document.getElementById('listB2'); b2.innerHTML='';
-  PROC.forEach(p=>{ (p.blk==='B1'?b1:b2).appendChild(procRow(p)); });
-}
-
-function recalc(){
-  // --- Bloque A: promedio ponderado SOLO sobre ítems con dato ---
-  const presentes = blockA.filter(x=>x.s!=null);
-  const aW = presentes.reduce((s,x)=>s+x.w,0);
-  const aEff = aW? presentes.reduce((s,x)=>s+x.w*x.s,0)/aW : 0;
-  const aContribution = aEff*0.51;
-  const aPend = blockA.length - presentes.length;
-
-  // --- Bloque B: B1 (SGC) y B2 (15) promedio de completos ---
-  const sgc = PROC.find(p=>p.id==='sgc');
-  const b1Eff = (sgc && sgc.completo)? sgc.resultado : null;
-  const b2arr = PROC.filter(p=>p.blk==='B2' && p.completo);
-  const b2Eff = b2arr.length? b2arr.reduce((s,p)=>s+p.resultado,0)/b2arr.length : null;
-  let bEff=null;
-  if(b1Eff!=null && b2Eff!=null) bEff=(b1Eff+b2Eff)/2;
-  else if(b1Eff!=null) bEff=b1Eff;
-  else if(b2Eff!=null) bEff=b2Eff;
-  const bContribution = (bEff!=null)? bEff*0.49 : 0;
-
-  const global = aContribution + bContribution;
-
-  // gauge
-  document.getElementById('globalNum').textContent=Math.round(global);
-  const arc=document.getElementById('gaugeArc'); const circ=540;
-  arc.style.strokeDashoffset = circ - circ*(global/100);
-  arc.style.stroke = global>=90?'#9be0b4': global>=80?'#f0d28a':'#f0a89e';
-  document.getElementById('bdA').textContent=aContribution.toFixed(1);
-  document.getElementById('bdB').textContent=bContribution.toFixed(1);
-  document.getElementById('barA').style.width=(aContribution/51*100)+'%';
-  document.getElementById('barB').style.width=(bContribution/49*100)+'%';
-  setBlock('aScore', aEff);
-  document.getElementById('bScore').textContent = (bEff!=null)? Math.round(bEff)+'%' : '—';
-  document.getElementById('bScore').style.color = (bEff!=null)? color(bEff) : 'var(--muted)';
-
-  // --- completitud ---
-  const completos = PROC.filter(p=>p.completo).length;
-  const sinCultura = PROC.filter(p=>p.cultura==null).length;
-  const sinRev = PROC.filter(p=>p.kpi==null||p.efp==null).length;
-  document.getElementById('compBar').innerHTML =
-    `<b>Bloque B: ${completos} de 16 procesos completos</b> · faltan ${16-completos}. `+
-    `Coordinadores sin evaluar por el comité: <b>${sinCultura}</b> · procesos sin captura de Revisiones: <b>${sinRev}</b>.`+
-    (aPend? ` · Bloque A: ${aPend} ítem(s) por capturar.` : '');
-  document.getElementById('bFoot').innerHTML =
-    `B1 (SGC) = ${b1Eff!=null?Math.round(b1Eff)+'%':'pendiente'} · B2 (15 procesos) = ${b2Eff!=null?Math.round(b2Eff)+'% ('+b2arr.length+' completos)':'pendiente'}`;
-  document.getElementById('bScoreW').textContent = (bEff!=null)? 'promedio de completos' : 'sin datos completos';
-}
-
-function setBlock(id,v){ const el=document.getElementById(id); el.textContent=Math.round(v)+'%'; el.style.color=color(v); }
-
-let paretoChart=null;
-function renderPareto(){
-  const canvas=document.getElementById('paretoChart');
-  if(!canvas || typeof Chart==='undefined') return;
-  const procs = PROC.filter(p=>p.completo).map(p=>({ nm:p.nm, coord:p.coord, res:p.resultado, afect:p.w*(100-p.resultado) }))
-    .filter(p=>p.afect>0.01).sort((a,b)=>b.afect-a.afect);
-  const total=procs.reduce((s,p)=>s+p.afect,0);
-  document.getElementById('paretoTotal').textContent=total.toFixed(1)+' pts';
-  let run=0;
-  const labels=procs.map(p=>p.nm);
-  const bars=procs.map(p=>+p.afect.toFixed(2));
-  const cum=procs.map(p=>{ run+=p.afect; return total? +(run/total*100).toFixed(1):0; });
-  const barColors=procs.map(p=> p.res>=90?'#2e7d4f': p.res>=80?'#c9952b':'#b53a2e');
-  let foco=[]; for(let i=0;i<cum.length;i++){ foco.push(procs[i]); if(cum[i]>=80) break; }
-  const focoEl=document.getElementById('paretoFoco');
-  if(procs.length===0) focoEl.innerHTML='<b>Sin procesos completos todavía:</b> el Pareto aparece cuando haya datos. ';
-  else focoEl.innerHTML='<b>Foco prioritario (80%):</b> '+foco.map(f=>f.nm+' ('+f.coord+')').join(' · ');
-  if(paretoChart){ paretoChart.destroy(); }
-  paretoChart=new Chart(canvas,{
-    data:{ labels, datasets:[
-      {type:'bar', label:'Afectación (pts PCE)', data:bars, backgroundColor:barColors, yAxisID:'y', order:2, borderRadius:4},
-      {type:'line', label:'% acumulado', data:cum, borderColor:'#1F3864', backgroundColor:'#1F3864', yAxisID:'y2', order:1, tension:.25, pointRadius:3, pointBackgroundColor:'#1F3864', borderWidth:2}
-    ]},
-    options:{ responsive:true,maintainAspectRatio:false,
-      plugins:{ legend:{labels:{font:{family:'Arial',size:11}}},
-        tooltip:{callbacks:{afterLabel:(c)=>{const p=procs[c.dataIndex]; return c.datasetIndex===0?('Resultado: '+Math.round(p.res)+'% · '+p.coord):'';}}}},
-      scales:{
-        x:{ticks:{font:{family:'Arial',size:10},maxRotation:55,minRotation:45},grid:{display:false}},
-        y:{position:'left',beginAtZero:true,title:{display:true,text:'Afectación (pts)',font:{family:'Arial',size:10}},ticks:{font:{family:'Arial',size:10}}},
-        y2:{position:'right',beginAtZero:true,max:100,grid:{drawOnChartArea:false},title:{display:true,text:'% acumulado',font:{family:'Arial',size:10}},ticks:{font:{family:'Arial',size:10},callback:v=>v+'%'}}
-      }
-    }
-  });
-}
-
-/* ---- captura manual (Bloque A) ---- */
-document.addEventListener('input', e=>{
-  const t=e.target; if(!t.dataset || t.dataset.man===undefined) return;
-  let v=t.value===''?null:Math.max(0,Math.min(100,parseFloat(t.value)));
-  if(isNaN(v)) v=null;
-  if(t.dataset.man==='kpi_puesto'){ manual.kpi_puesto=v; blockA[0].s=v; }
-  else if(t.dataset.man==='kpi_alta'){ manual.kpi_alta=v; blockA[2].s=v; }
-  markDirty(); recalc();
-});
-document.addEventListener('click', e=>{
-  const t=e.target;
-  if(t.classList && t.classList.contains('chk') && t.dataset.man==='libro'){
-    manual.libro = (manual.libro===true)? false : true;
-    blockA[5].s = manual.libro?100:0;
-    t.classList.toggle('on', manual.libro);
-    t.textContent = manual.libro?'✓ Cumplido':'✗ Pendiente';
-    markDirty(); recalc();
-  }
-});
 
 async function saveManual(){
   if(!db||!SESSION.pin){ toast('Inicia sesión con tu PIN','err'); return; }
