@@ -7,66 +7,23 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root{
-    --ink:#1a2e22;
-    --green:#1F3864;
-    --green-deep:#16294a;
-    --accent:#2E75B6;
-    --paper:#f4f1ea;
-    --card:#ffffff;
-    --line:#d9d3c6;
-    --ok:#2e7d4f;
-    --warn:#c9952b;
-    --bad:#b53a2e;
-    --muted:#6b6457;
-    --shadow:0 1px 3px rgba(31,56,100,.08),0 8px 24px rgba(31,56,100,.08);
-  }
+  :root{--ink:#1a2e22;--green:#1F3864;--green-deep:#16294a;--accent:#2E75B6;--paper:#f4f1ea;--card:#ffffff;--line:#d9d3c6;--ok:#2e7d4f;--warn:#c9952b;--bad:#b53a2e;--muted:#6b6457;--shadow:0 1px 3px rgba(31,56,100,.08),0 8px 24px rgba(31,56,100,.08);}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family:Georgia,'Times New Roman',serif;
-    background:
-      radial-gradient(1200px 600px at 80% -10%,rgba(46,117,182,.10),transparent 60%),
-      linear-gradient(180deg,#efeae0,#f4f1ea);
-    color:var(--ink);
-    min-height:100vh;
-    padding:32px 20px 80px;
-  }
+  body{font-family:Georgia,'Times New Roman',serif;background:radial-gradient(1200px 600px at 80% -10%,rgba(46,117,182,.10),transparent 60%),linear-gradient(180deg,#efeae0,#f4f1ea);color:var(--ink);min-height:100vh;padding:32px 20px 80px;}
   .wrap{max-width:1180px;margin:0 auto}
-  header.top{
-    display:flex;justify-content:space-between;align-items:flex-end;
-    border-bottom:3px solid var(--green);padding-bottom:18px;margin-bottom:28px;
-    flex-wrap:wrap;gap:16px;
-  }
-  .brand .eyebrow{
-    font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:.28em;
-    text-transform:uppercase;color:var(--accent);font-weight:700;
-  }
+  header.top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--green);padding-bottom:18px;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+  .brand .eyebrow{font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);font-weight:700;}
   .brand h1{font-size:30px;color:var(--green);letter-spacing:.5px;line-height:1.1;margin-top:4px}
   .brand .sub{font-family:Arial,sans-serif;font-size:13px;color:var(--muted);margin-top:6px}
-  .person{
-    text-align:right;font-family:Arial,sans-serif;
-  }
+  .person{text-align:right;font-family:Arial,sans-serif;}
   .person .lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
   .person .name{font-family:Georgia,serif;font-size:20px;color:var(--ink);font-weight:bold;margin-top:2px}
   .person .role{font-size:12px;color:var(--accent);margin-top:2px}
-
-  /* Global score */
-  .scoreband{
-    display:grid;grid-template-columns:260px 1fr;gap:28px;align-items:center;
-    background:linear-gradient(135deg,var(--green-deep),var(--green));
-    color:#fff;border-radius:18px;padding:28px 32px;margin-bottom:32px;
-    box-shadow:var(--shadow);position:relative;overflow:hidden;
-  }
-  .scoreband::after{
-    content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;
-    border-radius:50%;background:radial-gradient(circle,rgba(46,117,182,.4),transparent 70%);
-  }
+  .scoreband{display:grid;grid-template-columns:260px 1fr;gap:28px;align-items:center;background:linear-gradient(135deg,var(--green-deep),var(--green));color:#fff;border-radius:18px;padding:28px 32px;margin-bottom:32px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .scoreband::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(46,117,182,.4),transparent 70%);}
   .gauge{position:relative;width:200px;height:200px;margin:0 auto}
   .gauge svg{transform:rotate(-90deg)}
-  .gauge .val{
-    position:absolute;inset:0;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-  }
+  .gauge .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .gauge .num{font-size:48px;font-weight:bold;line-height:1}
   .gauge .pct{font-size:18px;opacity:.8}
   .gauge .tag{font-family:Arial,sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-top:6px;opacity:.85}
@@ -76,26 +33,17 @@
   .bdrow .bdtop b{font-weight:700}
   .bar{height:10px;border-radius:6px;background:rgba(255,255,255,.18);overflow:hidden}
   .bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#7fb2e0,#cfe3f6);transition:width .6s ease}
-
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
   @media(max-width:900px){.grid{grid-template-columns:1fr}.scoreband{grid-template-columns:1fr}}
-
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
-  .card .chead{
-    padding:18px 22px;border-bottom:1px solid var(--line);
-    display:flex;justify-content:space-between;align-items:center;
-    background:linear-gradient(180deg,#fbfaf6,#f6f3ec);
-  }
+  .card .chead{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,#fbfaf6,#f6f3ec);}
   .card .chead .t{font-size:19px;color:var(--green)}
   .card .chead .t small{display:block;font-family:Arial,sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
   .blockscore{font-family:Arial,sans-serif;text-align:right}
   .blockscore .bs{font-family:Georgia,serif;font-size:26px;font-weight:bold}
   .blockscore .bw{font-size:11px;color:var(--muted)}
   .clist{padding:8px 0}
-  .item{
-    display:grid;grid-template-columns:1fr 78px 110px;gap:10px;align-items:center;
-    padding:12px 22px;border-bottom:1px dashed var(--line);
-  }
+  .item{display:grid;grid-template-columns:1fr 78px 110px;gap:10px;align-items:center;padding:12px 22px;border-bottom:1px dashed var(--line);}
   .item:last-child{border-bottom:none}
   .item .nm{font-size:15px}
   .item .nm small{display:block;font-family:Arial,sans-serif;font-size:11px;color:var(--muted);margin-top:2px}
@@ -103,37 +51,25 @@
   .item .wt label{display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
   .item .wt .wv{font-family:Georgia,serif;font-size:15px;color:var(--ink)}
   .item .sc{display:flex;align-items:center;gap:8px;justify-content:flex-end}
-  .item .sc input{
-    width:56px;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;text-align:center;
-    border:1px solid var(--line);border-radius:8px;padding:6px 4px;
-  }
+  .item .sc input{width:56px;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;text-align:center;border:1px solid var(--line);border-radius:8px;padding:6px 4px;}
   .item .sc .rd{font-family:Georgia,serif;font-size:17px;font-weight:bold;min-width:46px;text-align:right}
   .src-tag{display:inline-block;font-family:Arial,sans-serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-top:3px}
   .src-tag.man{color:var(--warn)}
   .pend{color:var(--muted);font-style:italic;font-family:Arial,sans-serif;font-size:12px}
   .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
-  .foot{
-    padding:14px 22px;display:flex;justify-content:space-between;align-items:center;
-    font-family:Arial,sans-serif;font-size:12px;color:var(--muted);background:#fbfaf6;border-top:1px solid var(--line);gap:10px;flex-wrap:wrap;
-  }
+  .foot{padding:14px 22px;display:flex;justify-content:space-between;align-items:center;font-family:Arial,sans-serif;font-size:12px;color:var(--muted);background:#fbfaf6;border-top:1px solid var(--line);gap:10px;flex-wrap:wrap;}
   .foot b{color:var(--ink)}
   .warnsum{color:var(--bad);font-weight:700}
-
   .legend{display:flex;gap:18px;flex-wrap:wrap;font-family:Arial,sans-serif;font-size:12px;color:var(--muted);margin:26px 0 0;justify-content:center}
   .legend span{display:flex;align-items:center;gap:7px}
   .actions{display:flex;gap:12px;justify-content:center;margin-top:26px;flex-wrap:wrap}
-  button.act{
-    font-family:Arial,sans-serif;font-size:13px;letter-spacing:.04em;cursor:pointer;
-    border:1px solid var(--green);background:var(--green);color:#fff;
-    padding:11px 22px;border-radius:10px;transition:.2s;
-  }
+  button.act{font-family:Arial,sans-serif;font-size:13px;letter-spacing:.04em;cursor:pointer;border:1px solid var(--green);background:var(--green);color:#fff;padding:11px 22px;border-radius:10px;transition:.2s;}
   button.act.ghost{background:transparent;color:var(--green)}
   button.act:disabled{opacity:.5;cursor:not-allowed}
   button.act:hover:not(:disabled){background:var(--green-deep);border-color:var(--green-deep);color:#fff}
   .note{font-family:Arial,sans-serif;font-size:11px;color:var(--muted);text-align:center;margin-top:22px;line-height:1.6}
   .pill{display:inline-block;font-family:Arial,sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:20px;color:#fff}
   .subhead{grid-column:1/-1;font-family:Arial,sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);padding:10px 22px 2px;font-weight:700}
-  /* Resultado por proceso (Bloque B) */
   .pitem{padding:14px 22px;border-bottom:1px dashed var(--line)}
   .pitem:last-child{border-bottom:none}
   .pitem.incompleto{background:#fbfaf6}
@@ -150,8 +86,6 @@
   .formula-note b{color:var(--green)}
   .chk{font-family:Arial,sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--bad);background:#fff;color:var(--bad);padding:7px 12px;border-radius:8px;transition:.15s;white-space:nowrap}
   .chk.on{border-color:var(--ok);background:var(--ok);color:#fff}
-
-  /* ===== Login + barra de control + completitud + toast ===== */
   .ctrlbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 18px;margin-bottom:18px;font-family:Arial,sans-serif;font-size:12px;box-shadow:var(--shadow)}
   .ctrlbar .who{color:var(--muted)} .ctrlbar .who b{color:var(--green);font-family:Georgia,serif;font-size:14px}
   .ctrlbar select{font-family:Georgia,serif;font-size:14px;color:var(--green);border:1px solid var(--line);border-radius:8px;padding:5px 10px;background:#fff;cursor:pointer;margin-left:6px}
@@ -178,7 +112,6 @@
 </style>
 </head>
 <body>
-
 <div class="overlay" id="loginOverlay">
   <div class="loginbox">
     <div class="eyebrow">Recouromex · PCE</div>
@@ -191,13 +124,11 @@
 </div>
 <div id="toast" class="toast"></div>
 <button class="logout-btn" id="logoutBtn" onclick="cerrarSesion()">Cerrar sesión</button>
-
 <div class="wrap">
   <div class="ctrlbar">
     <div class="who">En sesión: <b id="sessUser">—</b><span class="pill2" id="sessPill">—</span></div>
     <div>Periodo: <select id="periodSel"></select></div>
   </div>
-
   <header class="top">
     <div class="brand">
       <div class="eyebrow">Recouromex · Indicador de Alta Dirección</div>
@@ -210,16 +141,12 @@
       <div class="role">Asistente de Gerencia / Dirección</div>
     </div>
   </header>
-
   <div class="compbar" id="compBar">Cargando datos del periodo…</div>
-
-  <!-- GLOBAL SCORE -->
   <section class="scoreband">
     <div class="gauge">
       <svg width="200" height="200" viewBox="0 0 200 200">
         <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="16"/>
-        <circle id="gaugeArc" cx="100" cy="100" r="86" fill="none" stroke="#cfe3f6" stroke-width="16"
-                stroke-linecap="round" stroke-dasharray="540" stroke-dashoffset="540"/>
+        <circle id="gaugeArc" cx="100" cy="100" r="86" fill="none" stroke="#cfe3f6" stroke-width="16" stroke-linecap="round" stroke-dasharray="540" stroke-dashoffset="540"/>
       </svg>
       <div class="val">
         <div class="num" id="globalNum">0</div>
@@ -239,9 +166,7 @@
       </div>
     </div>
   </section>
-
   <div class="grid">
-    <!-- BLOQUE A -->
     <section class="card" style="grid-column:1/-1">
       <div class="chead">
         <div class="t"><small>Bloque A · 51% del total</small>Resultado del propio puesto</div>
@@ -253,8 +178,6 @@
         <span><button class="act" id="saveManualBtn" style="padding:7px 16px;font-size:12px">Guardar capturas</button></span>
       </div>
     </section>
-
-    <!-- BLOQUE B -->
     <section class="card" style="grid-column:1/-1">
       <div class="chead">
         <div class="t"><small>Bloque B · 49% del total</small>Resultado del equipo</div>
@@ -265,116 +188,80 @@
       <div class="subhead">B2 · Resto de procesos · 50% del Bloque B</div>
       <div class="clist" id="listB2"></div>
       <div class="formula-note">
-        <b>Resultado por proceso</b> = KPI × 50% + Ef. Coordinador × 50%, con <b>Ef. Coordinador</b> = Desempeño × 50% + Cultura × 50%. KPI y Desempeño se leen de Revisiones; la Cultura, del comité (evaluación del coordinador). <b>Un proceso sin sus 3 datos no entra al promedio.</b>
+        <b>Resultado por proceso</b> = KPI × 50% + Ef. Coordinador × 50%, con <b>Ef. Coordinador</b> = Desempeño × 50% + Cultura × 50%. El KPI se lee de Revisiones, el Desempeño del coordinador de Eficiencia de Puesto, y la Cultura del comité (evaluación del coordinador). <b>Un proceso sin sus 3 datos no entra al promedio.</b>
       </div>
-      <div class="foot">
-        <span id="bFoot">—</span>
-      </div>
+      <div class="foot"><span id="bFoot">—</span></div>
     </section>
   </div>
-
-  <!-- PARETO DE AFECTACIONES -->
   <section class="card" style="margin-top:24px">
     <div class="chead">
       <div class="t"><small>Análisis 80/20 · Bloque B</small>Pareto de afectaciones — ¿qué procesos merecen más atención?</div>
       <div class="blockscore"><div class="bs" id="paretoTotal" style="font-size:18px">0 pts</div><div class="bw">afectación total acumulada</div></div>
     </div>
-    <div style="padding:20px 22px 8px">
-      <canvas id="paretoChart" height="120"></canvas>
-    </div>
+    <div style="padding:20px 22px 8px"><canvas id="paretoChart" height="120"></canvas></div>
     <div class="formula-note">
       <b>Afectación</b> = peso del proceso × (100 − resultado). Solo se grafican los procesos completos. La línea acumulada marca la regla 80/20.
     </div>
-    <div class="foot">
-      <span id="paretoFoco" style="color:var(--ink)"></span>
-    </div>
+    <div class="foot"><span id="paretoFoco" style="color:var(--ink)"></span></div>
   </section>
-
   <div class="legend">
     <span><i class="dot" style="background:var(--ok)"></i> Verde ≥ 90%</span>
     <span><i class="dot" style="background:var(--warn)"></i> Amarillo 80–89%</span>
     <span><i class="dot" style="background:var(--bad)"></i> Rojo &lt; 80%</span>
   </div>
-
   <div class="actions">
     <button class="act ghost" onclick="location.reload()">Actualizar datos</button>
     <button class="act" onclick="window.print()">Exportar / Imprimir PDF</button>
   </div>
-
-  <p class="note">
-    El PCE combina <b>Bloque A (51%)</b> y <b>Bloque B (49%)</b>. Los datos en vivo vienen de tus herramientas; lo que no existe en ningún módulo lo capturas en los campos ámbar.<br>
-    El resultado refleja solo los procesos con datos completos — los pendientes se marcan y no inflan ni castigan el número.
-  </p>
+  <p class="note">El PCE combina <b>Bloque A (51%)</b> y <b>Bloque B (49%)</b>. Los datos en vivo vienen de tus herramientas; lo que no existe en ningún módulo lo capturas en los campos ámbar.<br>El resultado refleja solo los procesos con datos completos — los pendientes se marcan y no inflan ni castigan el número.</p>
 </div>
-
 <script>
-/* =====================================================================
-   ███  CONFIG — EDITA SOLO ESTE BLOQUE  ███
-   Rodrigo pega la URL y la ANON key del proyecto (solo lectura + RPC).
-   ===================================================================== */
-const CONFIG = {
-  SUPABASE_URL:      "https://qcwpnovwyhzhqqmhjxco.supabase.co",   // ej: https://qcwpnovwyhzhqqmhjxco.supabase.co
-  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjd3Bub3Z3eWh6aHFxbWhqeGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MDA3OTUsImV4cCI6MjA5NTI3Njc5NX0.-MSnn07PdxstQ90OLf16823Nvihr47ePXoQSFvgC3mU"           // la llave pública (anon)
-};
-/* ===================================================================== */
-
+const CONFIG={SUPABASE_URL:"https://vbzitecyimcalorywiwr.supabase.co",SUPABASE_ANON_KEY:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZieml0ZWN5aW1jYWxvcnl3aXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDk4NjQsImV4cCI6MjA5NDgyNTg2NH0.qdZItXNc2Ck4kilUHWeTi_KHZ9Ptfui3mU_eV8k7ZaA"};
 let db=null;
-const SESSION={pin:null, evalId:null, nombre:null};
+const SESSION={pin:null,evalId:null,nombre:null};
 const COLAB='alma';
-let PERIODO=(()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); })();
+let PERIODO=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
 let dirty=false;
-const cfgOK = CONFIG.SUPABASE_URL && !CONFIG.SUPABASE_URL.startsWith("PEGAR")
-           && CONFIG.SUPABASE_ANON_KEY && !CONFIG.SUPABASE_ANON_KEY.startsWith("PEGAR");
+const cfgOK=CONFIG.SUPABASE_URL&&!CONFIG.SUPABASE_URL.startsWith("PEGAR")&&CONFIG.SUPABASE_ANON_KEY&&!CONFIG.SUPABASE_ANON_KEY.startsWith("PEGAR");
 const MES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
-/* ---- BLOQUE A · 6 ítems (pesos fijos de la calculadora; suma 51) ---- */
 const blockA=[
-  {nm:'KPI de su puesto', sub:'Indicadores propios del puesto', w:12, src:'manual_kpi',  tipo:'num',   s:null},
-  {nm:'Proyectos Especiales', sub:'Avance global del Gestor de Proyectos', w:10, src:'gpr', tipo:'read', s:null},
-  {nm:'KPI de Alta Dirección', sub:'Resultado de los KPI que sirve a Dirección', w:8, src:'manual_alta', tipo:'num', s:null},
-  {nm:'Apego a la cultura', sub:'Evaluación del comité (Alma · periodo)', w:8, src:'cult', tipo:'read', s:null},
-  {nm:'Revisiones Macro/Micro', sub:'Triage del mes capturado', w:7, src:'rev_check', tipo:'read', s:null},
-  {nm:'Lectura + resumen de libro', sub:'Cumplimiento (c/2 meses)', w:6, src:'manual_libro', tipo:'check', s:null},
+  {nm:'KPI de su puesto',sub:'Indicadores propios del puesto',w:12,src:'manual_kpi',tipo:'num',s:null},
+  {nm:'Proyectos Especiales',sub:'Avance global del Gestor de Proyectos',w:10,src:'gpr',tipo:'read',s:null},
+  {nm:'KPI de Alta Dirección',sub:'Resultado de los KPI que sirve a Dirección',w:8,src:'manual_alta',tipo:'num',s:null},
+  {nm:'Apego a la cultura',sub:'Evaluación del comité (Alma · periodo)',w:8,src:'cult',tipo:'read',s:null},
+  {nm:'Revisiones Macro/Micro',sub:'Triage del mes capturado',w:7,src:'rev_check',tipo:'read',s:null},
+  {nm:'Lectura + resumen de libro',sub:'Cumplimiento (c/2 meses)',w:6,src:'manual_libro',tipo:'check',s:null},
 ];
-
-/* ---- BLOQUE B · 16 procesos (SGC 50% + 15 procesos 50%) ---- */
 const PW2=+(24.5/15).toFixed(4);
 const PROC=[
-  {id:'sgc', nm:'SGC — Sistema de Gestión de Calidad', coord:'Coord. SGC', w:24.5, blk:'B1'},
-  {id:'credito_cobranza', nm:'Crédito y Cobranza', coord:'Coord. Crédito y Cobranza', w:PW2, blk:'B2'},
-  {id:'compras', nm:'Compras', coord:'Coord. Compras', w:PW2, blk:'B2'},
-  {id:'ventas', nm:'Ventas', coord:'Coord. Ventas', w:PW2, blk:'B2'},
-  {id:'rh', nm:'Recursos Humanos', coord:'Coord. RH', w:PW2, blk:'B2'},
-  {id:'seguridad_5s', nm:'Seguridad e Higiene y 5S', coord:'Coord. CMSH / 5S', w:PW2, blk:'B2'},
-  {id:'aduana', nm:'Aduana de Apoyo a Ventas', coord:'Coord. Aduana', w:PW2, blk:'B2'},
-  {id:'logistica', nm:'Logística', coord:'Coord. Logística', w:PW2, blk:'B2'},
-  {id:'pcp_lc', nm:'PCP LC', coord:'Coord. PCP LC', w:PW2, blk:'B2'},
-  {id:'pcp_rc', nm:'PCP RC', coord:'Coord. PCP RC', w:PW2, blk:'B2'},
-  {id:'prod_lc', nm:'Producción LC', coord:'Coord. Producción LC', w:PW2, blk:'B2'},
-  {id:'prod_rc', nm:'Producción RC', coord:'Coord. Producción RC', w:PW2, blk:'B2'},
-  {id:'lab_cc', nm:'Lab. Control de Calidad', coord:'Coord. Lab. C. Calidad', w:PW2, blk:'B2'},
-  {id:'lab_igual', nm:'Lab. Igualación', coord:'Coord. Lab. Igualación', w:PW2, blk:'B2'},
-  {id:'diseno', nm:'Diseño y Desarrollo', coord:'Coord. Diseño y Desarrollo', w:PW2, blk:'B2'},
-  {id:'almacen_rc', nm:'Almacén RC', coord:'Coord. Almacén RC', w:PW2, blk:'B2'},
+  {id:'sgc',nm:'SGC — Sistema de Gestión de Calidad',coord:'Coord. SGC',coordId:'coord_sgc',w:24.5,blk:'B1'},
+  {id:'credito_cobranza',nm:'Crédito y Cobranza',coord:'Coord. Crédito y Cobranza',coordId:'coord_credito',w:PW2,blk:'B2'},
+  {id:'compras',nm:'Compras',coord:'Coord. Compras',coordId:'coord_compras',w:PW2,blk:'B2'},
+  {id:'ventas',nm:'Ventas',coord:'Coord. Ventas',coordId:'coord_ventas',w:PW2,blk:'B2'},
+  {id:'rh',nm:'Recursos Humanos',coord:'Coord. RH',coordId:'coord_rh',w:PW2,blk:'B2'},
+  {id:'seguridad_5s',nm:'Seguridad e Higiene y 5S',coord:'Coord. CMSH / 5S',coordId:'coord_seguridad',w:PW2,blk:'B2'},
+  {id:'aduana',nm:'Aduana de Apoyo a Ventas',coord:'Coord. Aduana',coordId:'coord_aduana',w:PW2,blk:'B2'},
+  {id:'logistica',nm:'Logística',coord:'Coord. Logística',coordId:'coord_logistica',w:PW2,blk:'B2'},
+  {id:'pcp_lc',nm:'PCP LC',coord:'Coord. PCP LC',coordId:'coord_pcp_lc',w:PW2,blk:'B2'},
+  {id:'pcp_rc',nm:'PCP RC',coord:'Coord. PCP RC',coordId:'coord_pcp_rc',w:PW2,blk:'B2'},
+  {id:'prod_lc',nm:'Producción LC',coord:'Coord. Producción LC',coordId:'coord_prod_lc',w:PW2,blk:'B2'},
+  {id:'prod_rc',nm:'Producción RC',coord:'Coord. Producción RC',coordId:'coord_prod_rc',w:PW2,blk:'B2'},
+  {id:'lab_cc',nm:'Lab. Control de Calidad',coord:'Coord. Lab. C. Calidad',coordId:'coord_lab_cc',w:PW2,blk:'B2'},
+  {id:'lab_igual',nm:'Lab. Igualación',coord:'Coord. Lab. Igualación',coordId:'coord_lab_igual',w:PW2,blk:'B2'},
+  {id:'diseno',nm:'Diseño y Desarrollo',coord:'Coord. Diseño y Desarrollo',coordId:'coord_diseno',w:PW2,blk:'B2'},
+  {id:'almacen_rc',nm:'Almacén RC',coord:'Coord. Almacén RC',coordId:'coord_almacen_rc',w:PW2,blk:'B2'},
 ];
-// estado por proceso: {kpi, efp, cultura, resultado, completo, faltan[]}
-PROC.forEach(p=>{ p.kpi=null; p.efp=null; p.cultura=null; p.resultado=null; p.completo=false; p.faltan=[]; });
-
-const manual={kpi_puesto:null, kpi_alta:null, libro:null};  // null = sin capturar
-
-function color(v){ return v>=90?'var(--ok)': v>=80?'var(--warn)':'var(--bad)'; }
-function money(v){ return v; }
-function toast(msg,kind){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'+(kind?(' '+kind):''); clearTimeout(t._h); t._h=setTimeout(()=>{t.className='toast';},3800); }
-function markDirty(){ dirty=true; }
-
-/* =====================================================================
-   LECTURAS EN VIVO
-   ===================================================================== */
+PROC.forEach(p=>{p.kpi=null;p.efp=null;p.cultura=null;p.resultado=null;p.completo=false;p.faltan=[];});
+const manual={kpi_puesto:null,kpi_alta:null,libro:null};
+function color(v){return v>=90?'var(--ok)':v>=80?'var(--warn)':'var(--bad)';}
+function money(v){return v;}
+function toast(msg,kind){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(kind?(' '+kind):'');clearTimeout(t._h);t._h=setTimeout(()=>{t.className='toast';},3800);}
+function markDirty(){dirty=true;}
 async function loadAll(){
-  if(!db) return;
+  if(!db)return;
   document.getElementById('compBar').textContent='Leyendo datos del periodo '+PERIODO+'…';
   try{
-    const [gprRes, revRes, cultRes, procRes, efpRes, cultColabRes, manRes] = await Promise.all([
+    const[gprRes,revRes,cultRes,procRes,efpRes,cultColabRes,manRes]=await Promise.all([
       db.from('gpr_projects').select('hitos'),
       db.from('rev_revisiones').select('proceso_id,kpi').eq('periodo',PERIODO),
       db.from('cult_evaluaciones').select('colaborador_id,resultado').eq('periodo',PERIODO),
@@ -383,47 +270,43 @@ async function loadAll(){
       db.from('cult_colaboradores').select('id,efp_persona_id'),
       db.from('pce_manual').select('*').eq('colaborador_id',COLAB).eq('periodo',PERIODO).maybeSingle()
     ]);
-    for(const r of [gprRes,revRes,cultRes,procRes,efpRes,cultColabRes]) if(r.error) throw r.error;
+    for(const r of[gprRes,revRes,cultRes,procRes,efpRes,cultColabRes])if(r.error)throw r.error;
     let manRow=null;
-    if(manRes.error){ console.warn('pce_manual:', manRes.error.message); }
+    if(manRes.error){console.warn('pce_manual:',manRes.error.message);}
     else manRow=manRes.data;
-    const projs=gprRes.data||[]; const progs=[];
-    projs.forEach(pr=>{ const h=Array.isArray(pr.hitos)?pr.hitos:[]; if(h.length) progs.push(Math.round(h.filter(x=>x.hecho).length/h.length*100)); });
-    const gprAvance = progs.length? Math.round(progs.reduce((a,b)=>a+b,0)/progs.length) : null;
-    const cultMap={}; (cultRes.data||[]).forEach(r=>{ cultMap[r.colaborador_id]=r.resultado; });
-    const almaCult = (cultMap[COLAB]!=null)? cultMap[COLAB] : null;
+    const projs=gprRes.data||[];const progs=[];
+    projs.forEach(pr=>{const h=Array.isArray(pr.hitos)?pr.hitos:[];if(h.length)progs.push(Math.round(h.filter(x=>x.hecho).length/h.length*100));});
+    const gprAvance=progs.length?Math.round(progs.reduce((a,b)=>a+b,0)/progs.length):null;
+    const cultMap={};(cultRes.data||[]).forEach(r=>{cultMap[r.colaborador_id]=r.resultado;});
+    const almaCult=(cultMap[COLAB]!=null)?cultMap[COLAB]:null;
     const revRows=revRes.data||[];
-    const triageCapturado = revRows.some(r=>r.kpi!=null);
-    const revCheck = revRows.length? (triageCapturado?100:0) : null;
-    manual.kpi_puesto = manRow? (manRow.kpi_puesto!=null?manRow.kpi_puesto:null) : null;
-    manual.kpi_alta   = manRow? (manRow.kpi_alta_direccion!=null?manRow.kpi_alta_direccion:null) : null;
-    manual.libro      = manRow? !!manRow.libro_hecho : null;
-    blockA[0].s = manual.kpi_puesto;
-    blockA[1].s = gprAvance;
-    blockA[2].s = manual.kpi_alta;
-    blockA[3].s = almaCult;
-    blockA[4].s = revCheck;
-    blockA[5].s = (manual.libro==null)? null : (manual.libro?100:0);
-    const revMap={}; revRows.forEach(r=>{ revMap[r.proceso_id]=r; });
-    const procCoord={}; (procRes.data||[]).forEach(r=>{ procCoord[r.id]=r.coordinador_id; });
-    const efpMap={}; (efpRes.data||[]).forEach(r=>{ efpMap[r.persona_id]=r.resultado; });
-    const cultColabByEfp={}; (cultColabRes.data||[]).forEach(r=>{ if(r.efp_persona_id!=null) cultColabByEfp[r.efp_persona_id]=r.id; });
+    const triageCapturado=revRows.some(r=>r.kpi!=null);
+    const revCheck=revRows.length?(triageCapturado?100:0):null;
+    manual.kpi_puesto=manRow?(manRow.kpi_puesto!=null?manRow.kpi_puesto:null):null;
+    manual.kpi_alta=manRow?(manRow.kpi_alta_direccion!=null?manRow.kpi_alta_direccion:null):null;
+    manual.libro=manRow?!!manRow.libro_hecho:null;
+    blockA[0].s=manual.kpi_puesto;blockA[1].s=gprAvance;blockA[2].s=manual.kpi_alta;blockA[3].s=almaCult;blockA[4].s=revCheck;
+    blockA[5].s=(manual.libro==null)?null:(manual.libro?100:0);
+    const revMap={};revRows.forEach(r=>{revMap[r.proceso_id]=r;});
+    const procCoord={};(procRes.data||[]).forEach(r=>{procCoord[r.id]=r.coordinador_id;});
+    const efpMap={};(efpRes.data||[]).forEach(r=>{efpMap[r.persona_id]=r.resultado;});
+    const cultColabByEfp={};(cultColabRes.data||[]).forEach(r=>{if(r.efp_persona_id!=null)cultColabByEfp[r.efp_persona_id]=r.id;});
     PROC.forEach(p=>{
       const rv=revMap[p.id]||{};
-      const coordId = procCoord[p.id];
-      p.kpi = (rv.kpi!=null)? Number(rv.kpi) : null;
-      p.efp = (coordId!=null && efpMap[coordId]!=null)? Number(efpMap[coordId]) : null;
-      const cultColabId = (coordId!=null)? cultColabByEfp[coordId] : null;
-      p.cultura = (cultColabId!=null && cultMap[cultColabId]!=null)? Number(cultMap[cultColabId]) : null;
+      const coordId=procCoord[p.id];
+      p.kpi=(rv.kpi!=null)?Number(rv.kpi):null;
+      p.efp=(coordId!=null&&efpMap[coordId]!=null)?Number(efpMap[coordId]):null;
+      const cultColabId=(coordId!=null)?cultColabByEfp[coordId]:null;
+      p.cultura=(cultColabId!=null&&cultMap[cultColabId]!=null)?Number(cultMap[cultColabId]):null;
       p.faltan=[];
-      if(p.kpi==null) p.faltan.push('KPI');
-      if(p.efp==null) p.faltan.push('Desempeño');
-      if(p.cultura==null) p.faltan.push('Cultura del comité');
-      p.completo = (p.faltan.length===0);
-      if(p.completo){ const efCoord = p.efp*0.5 + p.cultura*0.5; p.efCoord = efCoord; p.resultado = p.kpi*0.5 + efCoord*0.5; }
-      else { p.efCoord = null; p.resultado = null; }
+      if(p.kpi==null)p.faltan.push('KPI');
+      if(p.efp==null)p.faltan.push('Desempeño');
+      if(p.cultura==null)p.faltan.push('Cultura del comité');
+      p.completo=(p.faltan.length===0);
+      if(p.completo){const efCoord=p.efp*0.5+p.cultura*0.5;p.efCoord=efCoord;p.resultado=p.kpi*0.5+efCoord*0.5;}
+      else{p.efCoord=null;p.resultado=null;}
     });
-    renderA(); renderB(); recalc(); renderPareto();
+    renderA();renderB();recalc();renderPareto();
     document.getElementById('sessPill').textContent='en vivo';
   }catch(err){
     console.error(err);
@@ -431,74 +314,165 @@ async function loadAll(){
     toast('Error al leer datos: '+(err.message||err),'err');
   }
 }
-
+function renderA(){
+  const el=document.getElementById('listA');el.innerHTML='';
+  blockA.forEach((it,i)=>{
+    const row=document.createElement('div');row.className='item';
+    let scCell;const pend=(it.s==null);
+    if(it.src==='manual_kpi'||it.src==='manual_alta'){
+      const key=it.src==='manual_kpi'?'kpi_puesto':'kpi_alta';
+      scCell=`<div class="sc"><input type="number" min="0" max="100" placeholder="—" value="${it.s==null?'':it.s}" data-man="${key}"><span class="dot" style="background:${it.s==null?'var(--line)':color(it.s)}"></span></div>`;
+    }else if(it.src==='manual_libro'){
+      const on=it.s===100;
+      scCell=`<div class="sc"><button class="chk ${on?'on':''}" data-man="libro">${on?'✓ Cumplido':(it.s===0?'✗ Pendiente':'— Sin marcar')}</button></div>`;
+    }else{
+      scCell=pend?`<div class="sc"><span class="pend">⏳ pendiente</span></div>`:`<div class="sc"><span class="rd" style="color:${color(it.s)}">${Math.round(it.s)}%</span><span class="dot" style="background:${color(it.s)}"></span></div>`;
+    }
+    const tag=(it.src.startsWith('manual'))?`<span class="src-tag man">captura manual</span>`:`<span class="src-tag">${it.src==='gpr'?'lee · Gestor':it.src==='cult'?'lee · Cultura':'lee · Revisiones'}</span>`;
+    row.innerHTML=`<div class="nm">${it.nm}<small>${it.sub}</small>${tag}</div><div class="wt"><label>Peso</label><span class="wv">${it.w}</span></div>${scCell}`;
+    el.appendChild(row);
+  });
+}
+function procRow(p){
+  const row=document.createElement('div');row.className='pitem'+(p.completo?'':' incompleto');
+  let resCell;
+  if(p.completo){resCell=`<div style="text-align:right"><div class="pwt">Resultado</div><div class="rv" style="color:${color(p.resultado)}">${Math.round(p.resultado)}%</div></div>`;}
+  else{resCell=`<div style="text-align:right"><div class="pwt">Estado</div><div class="pendtag">⏳ Pendiente</div></div>`;}
+  const det=p.completo?`KPI <b>${Math.round(p.kpi)}</b> · Desempeño <b>${Math.round(p.efp)}</b> · Cultura <b>${Math.round(p.cultura)}</b>`:`Falta: <b>${p.faltan.join(' · ')}</b>`;
+  row.innerHTML=`<div class="ptop"><div class="pnm">${p.nm}<small>Coordina: ${p.coord}</small></div><div class="pres"><div style="text-align:right"><div class="pwt">Peso</div><div class="pwt" style="color:var(--ink);font-family:Georgia,serif;font-size:14px">${p.w}</div></div>${resCell}</div></div><div class="pdet">${det}</div>`;
+  return row;
+}
+function renderB(){
+  const b1=document.getElementById('listB1');b1.innerHTML='';
+  const b2=document.getElementById('listB2');b2.innerHTML='';
+  PROC.forEach(p=>{(p.blk==='B1'?b1:b2).appendChild(procRow(p));});
+}
+function recalc(){
+  const presentes=blockA.filter(x=>x.s!=null);
+  const aW=presentes.reduce((s,x)=>s+x.w,0);
+  const aEff=aW?presentes.reduce((s,x)=>s+x.w*x.s,0)/aW:0;
+  const aContribution=aEff*0.51;const aPend=blockA.length-presentes.length;
+  const sgc=PROC.find(p=>p.id==='sgc');
+  const b1Eff=(sgc&&sgc.completo)?sgc.resultado:null;
+  const b2arr=PROC.filter(p=>p.blk==='B2'&&p.completo);
+  const b2Eff=b2arr.length?b2arr.reduce((s,p)=>s+p.resultado,0)/b2arr.length:null;
+  let bEff=null;
+  if(b1Eff!=null&&b2Eff!=null)bEff=(b1Eff+b2Eff)/2;
+  else if(b1Eff!=null)bEff=b1Eff;
+  else if(b2Eff!=null)bEff=b2Eff;
+  const bContribution=(bEff!=null)?bEff*0.49:0;
+  const global=aContribution+bContribution;
+  document.getElementById('globalNum').textContent=Math.round(global);
+  const arc=document.getElementById('gaugeArc');const circ=540;
+  arc.style.strokeDashoffset=circ-circ*(global/100);
+  arc.style.stroke=global>=90?'#9be0b4':global>=80?'#f0d28a':'#f0a89e';
+  document.getElementById('bdA').textContent=aContribution.toFixed(1);
+  document.getElementById('bdB').textContent=bContribution.toFixed(1);
+  document.getElementById('barA').style.width=(aContribution/51*100)+'%';
+  document.getElementById('barB').style.width=(bContribution/49*100)+'%';
+  setBlock('aScore',aEff);
+  document.getElementById('bScore').textContent=(bEff!=null)?Math.round(bEff)+'%':'—';
+  document.getElementById('bScore').style.color=(bEff!=null)?color(bEff):'var(--muted)';
+  const completos=PROC.filter(p=>p.completo).length;
+  const sinCultura=PROC.filter(p=>p.cultura==null).length;
+  const sinKpi=PROC.filter(p=>p.kpi==null).length;
+  const sinDesemp=PROC.filter(p=>p.efp==null).length;
+  document.getElementById('compBar').innerHTML=`<b>Bloque B: ${completos} de 16 procesos completos</b> · faltan ${16-completos}. Sin KPI (Revisiones): <b>${sinKpi}</b> · sin Desempeño (Ef. de Puesto): <b>${sinDesemp}</b> · sin Cultura (comité): <b>${sinCultura}</b>.`+(aPend?` · Bloque A: ${aPend} ítem(s) por capturar.`:'');
+  document.getElementById('bFoot').innerHTML=`B1 (SGC) = ${b1Eff!=null?Math.round(b1Eff)+'%':'pendiente'} · B2 (15 procesos) = ${b2Eff!=null?Math.round(b2Eff)+'% ('+b2arr.length+' completos)':'pendiente'}`;
+  document.getElementById('bScoreW').textContent=(bEff!=null)?'promedio de completos':'sin datos completos';
+}
+function setBlock(id,v){const el=document.getElementById(id);el.textContent=Math.round(v)+'%';el.style.color=color(v);}
+let paretoChart=null;
+function renderPareto(){
+  const canvas=document.getElementById('paretoChart');
+  if(!canvas||typeof Chart==='undefined')return;
+  const procs=PROC.filter(p=>p.completo).map(p=>({nm:p.nm,coord:p.coord,res:p.resultado,afect:p.w*(100-p.resultado)})).filter(p=>p.afect>0.01).sort((a,b)=>b.afect-a.afect);
+  const total=procs.reduce((s,p)=>s+p.afect,0);
+  document.getElementById('paretoTotal').textContent=total.toFixed(1)+' pts';
+  let run=0;
+  const labels=procs.map(p=>p.nm);
+  const bars=procs.map(p=>+p.afect.toFixed(2));
+  const cum=procs.map(p=>{run+=p.afect;return total?+(run/total*100).toFixed(1):0;});
+  const barColors=procs.map(p=>p.res>=90?'#2e7d4f':p.res>=80?'#c9952b':'#b53a2e');
+  let foco=[];for(let i=0;i<cum.length;i++){foco.push(procs[i]);if(cum[i]>=80)break;}
+  const focoEl=document.getElementById('paretoFoco');
+  if(procs.length===0)focoEl.innerHTML='<b>Sin procesos completos todavía:</b> el Pareto aparece cuando haya datos. ';
+  else focoEl.innerHTML='<b>Foco prioritario (80%):</b> '+foco.map(f=>f.nm+' ('+f.coord+')').join(' · ');
+  if(paretoChart){paretoChart.destroy();}
+  paretoChart=new Chart(canvas,{data:{labels,datasets:[{type:'bar',label:'Afectación (pts PCE)',data:bars,backgroundColor:barColors,yAxisID:'y',order:2,borderRadius:4},{type:'line',label:'% acumulado',data:cum,borderColor:'#1F3864',backgroundColor:'#1F3864',yAxisID:'y2',order:1,tension:.25,pointRadius:3,pointBackgroundColor:'#1F3864',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:'Arial',size:11}}},tooltip:{callbacks:{afterLabel:(c)=>{const p=procs[c.dataIndex];return c.datasetIndex===0?('Resultado: '+Math.round(p.res)+'% · '+p.coord):'';}}}},scales:{x:{ticks:{font:{family:'Arial',size:10},maxRotation:55,minRotation:45},grid:{display:false}},y:{position:'left',beginAtZero:true,title:{display:true,text:'Afectación (pts)',font:{family:'Arial',size:10}},ticks:{font:{family:'Arial',size:10}}},y2:{position:'right',beginAtZero:true,max:100,grid:{drawOnChartArea:false},title:{display:true,text:'% acumulado',font:{family:'Arial',size:10}},ticks:{font:{family:'Arial',size:10},callback:v=>v+'%'}}}}});
+}
+document.addEventListener('input',e=>{
+  const t=e.target;if(!t.dataset||t.dataset.man===undefined)return;
+  let v=t.value===''?null:Math.max(0,Math.min(100,parseFloat(t.value)));
+  if(isNaN(v))v=null;
+  if(t.dataset.man==='kpi_puesto'){manual.kpi_puesto=v;blockA[0].s=v;}
+  else if(t.dataset.man==='kpi_alta'){manual.kpi_alta=v;blockA[2].s=v;}
+  markDirty();recalc();
+});
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.classList&&t.classList.contains('chk')&&t.dataset.man==='libro'){
+    manual.libro=(manual.libro===true)?false:true;
+    blockA[5].s=manual.libro?100:0;
+    t.classList.toggle('on',manual.libro);
+    t.textContent=manual.libro?'✓ Cumplido':'✗ Pendiente';
+    markDirty();recalc();
+  }
+});
 async function saveManual(){
-  if(!db||!SESSION.pin){ toast('Inicia sesión con tu PIN','err'); return; }
-  const btn=document.getElementById('saveManualBtn'); const o=btn.textContent; btn.disabled=true; btn.textContent='Guardando…';
+  if(!db||!SESSION.pin){toast('Inicia sesión con tu PIN','err');return;}
+  const btn=document.getElementById('saveManualBtn');const o=btn.textContent;btn.disabled=true;btn.textContent='Guardando…';
   try{
-    const { error } = await db.rpc('pce_upsert_manual', {
-      p_pin:SESSION.pin, p_colaborador:COLAB, p_periodo:PERIODO,
-      p_kpi_puesto:manual.kpi_puesto, p_kpi_alta:manual.kpi_alta, p_libro:(manual.libro===true)
-    });
-    if(error) throw error;
-    dirty=false; toast('Capturas guardadas ✓','ok');
-  }catch(err){ console.error(err); toast('No se pudo guardar: '+(err.message||err),'err'); }
-  finally{ btn.disabled=false; btn.textContent=o; }
+    const{error}=await db.rpc('pce_upsert_manual',{p_pin:SESSION.pin,p_colaborador:COLAB,p_periodo:PERIODO,p_kpi_puesto:manual.kpi_puesto,p_kpi_alta:manual.kpi_alta,p_libro:(manual.libro===true)});
+    if(error)throw error;
+    dirty=false;toast('Capturas guardadas ✓','ok');
+  }catch(err){console.error(err);toast('No se pudo guardar: '+(err.message||err),'err');}
+  finally{btn.disabled=false;btn.textContent=o;}
 }
-
-/* ---- periodo ---- */
 function fillPeriodSelect(){
-  const sel=document.getElementById('periodSel'); sel.innerHTML='';
-  for(let m=1;m<=12;m++){ const v='2026-'+String(m).padStart(2,'0'); const o=document.createElement('option'); o.value=v; o.textContent=MES[m-1]+' 2026'; sel.appendChild(o); }
-  if([...sel.options].some(o=>o.value===PERIODO)) sel.value=PERIODO; else { sel.value='2026-'+String(new Date().getMonth()+1).padStart(2,'0'); PERIODO=sel.value; }
-  sel.addEventListener('change',e=>{ PERIODO=e.target.value; if(db&&SESSION.pin) loadAll(); });
+  const sel=document.getElementById('periodSel');sel.innerHTML='';
+  for(let m=1;m<=12;m++){const v='2026-'+String(m).padStart(2,'0');const o=document.createElement('option');o.value=v;o.textContent=MES[m-1]+' 2026';sel.appendChild(o);}
+  if([...sel.options].some(o=>o.value===PERIODO))sel.value=PERIODO;else{sel.value='2026-'+String(new Date().getMonth()+1).padStart(2,'0');PERIODO=sel.value;}
+  sel.addEventListener('change',e=>{PERIODO=e.target.value;if(db&&SESSION.pin)loadAll();});
 }
-
-/* ---- login (reusa cult_check_pin) ---- */
 function cerrarSesion(){
-  SESSION.pin=null; SESSION.evalId=null; SESSION.nombre=null;
-  if(typeof dirty!=='undefined') dirty=false;
-  const lb=document.getElementById('logoutBtn'); if(lb) lb.classList.remove('show');
-  const su=document.getElementById('sessUser'); if(su) su.textContent='—';
-  const sp=document.getElementById('sessPill'); if(sp) sp.textContent='—';
-  const pin=document.getElementById('pinInput'); if(pin) pin.value='';
-  const msg=document.getElementById('loginMsg'); if(msg){ msg.className='msg info'; msg.textContent='Ingresa tu PIN.'; }
+  SESSION.pin=null;SESSION.evalId=null;SESSION.nombre=null;
+  if(typeof dirty!=='undefined')dirty=false;
+  const lb=document.getElementById('logoutBtn');if(lb)lb.classList.remove('show');
+  const su=document.getElementById('sessUser');if(su)su.textContent='—';
+  const sp=document.getElementById('sessPill');if(sp)sp.textContent='—';
+  const pin=document.getElementById('pinInput');if(pin)pin.value='';
+  const msg=document.getElementById('loginMsg');if(msg){msg.className='msg info';msg.textContent='Ingresa tu PIN.';}
   document.getElementById('loginOverlay').classList.remove('hidden');
-  if(pin) pin.focus();
+  if(pin)pin.focus();
 }
 async function doLogin(){
   const msg=document.getElementById('loginMsg');
   const pin=document.getElementById('pinInput').value.trim();
-  if(!pin){ msg.className='msg err'; msg.textContent='Escribe tu PIN.'; return; }
-  if(!db){ msg.className='msg err'; msg.textContent='Falta configurar el acceso (bloque CONFIG).'; return; }
-  msg.className='msg info'; msg.textContent='Verificando…';
+  if(!pin){msg.className='msg err';msg.textContent='Escribe tu PIN.';return;}
+  if(!db){msg.className='msg err';msg.textContent='Falta configurar el acceso (bloque CONFIG).';return;}
+  msg.className='msg info';msg.textContent='Verificando…';
   try{
-    const { data, error } = await db.rpc('cult_check_pin', { p_pin: pin });
-    if(error) throw error;
-    if(!data){ msg.className='msg err'; msg.textContent='PIN incorrecto.'; return; }
-    SESSION.pin=pin; SESSION.evalId=data; SESSION.nombre=data;
-    document.getElementById('sessUser').textContent = data==='direccion'?'Dirección':(data==='alma'?'Alma':data);
+    const{data,error}=await db.rpc('cult_check_pin',{p_pin:pin});
+    if(error)throw error;
+    if(!data){msg.className='msg err';msg.textContent='PIN incorrecto.';return;}
+    SESSION.pin=pin;SESSION.evalId=data;SESSION.nombre=data;
+    document.getElementById('sessUser').textContent=data==='direccion'?'Dirección':(data==='alma'?'Alma':data);
     document.getElementById('loginOverlay').classList.add('hidden');
     document.getElementById('logoutBtn').classList.add('show');
     await loadAll();
     toast('Bienvenido(a)','ok');
-  }catch(err){ console.error(err); msg.className='msg err'; msg.textContent='Error al validar PIN: '+(err.message||err); }
+  }catch(err){console.error(err);msg.className='msg err';msg.textContent='Error al validar PIN: '+(err.message||err);}
 }
-
 function init(){
-  fillPeriodSelect();
-  renderA(); renderB();
+  fillPeriodSelect();renderA();renderB();
   const msg=document.getElementById('loginMsg');
-  if(!cfgOK){
-    msg.className='msg err';
-    msg.innerHTML='⚠ Falta pegar la URL y la llave en el bloque <b>CONFIG</b> (arriba en el código). Pídeselo a Rodrigo.';
-    document.getElementById('pinBtn').disabled=true; return;
-  }
-  db=window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-  msg.className='msg info'; msg.textContent='Conectado. Ingresa tu PIN.';
-  document.getElementById('pinBtn').addEventListener('click', doLogin);
-  document.getElementById('pinInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
-  document.getElementById('saveManualBtn').addEventListener('click', saveManual);
+  if(!cfgOK){msg.className='msg err';msg.innerHTML='⚠ Falta pegar la URL y la llave en el bloque CONFIG. Pídeselo a Rodrigo.';document.getElementById('pinBtn').disabled=true;return;}
+  db=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY);
+  msg.className='msg info';msg.textContent='Conectado. Ingresa tu PIN.';
+  document.getElementById('pinBtn').addEventListener('click',doLogin);
+  document.getElementById('pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  document.getElementById('saveManualBtn').addEventListener('click',saveManual);
   document.getElementById('pinInput').focus();
 }
 init();
