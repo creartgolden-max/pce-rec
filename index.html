@@ -704,7 +704,7 @@ async function loadAll(){
 
     const [gprRes, revRes, cultRes, procRes, efpRes, cultColabRes, manRes] = await Promise.all([
 
-      db.from('gpr_projects').select('hitos'),
+      db.from('gpr2_proyectos').select('hitos'),
 
       db.from('rev_revisiones').select('proceso_id,kpi').eq('periodo',PERIODO),
 
