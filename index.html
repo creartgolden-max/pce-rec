@@ -736,7 +736,7 @@ async function loadAll(){
 
     const projs=gprRes.data||[]; const progs=[];
 
-    projs.forEach(pr=>{ const h=Array.isArray(pr.hitos)?pr.hitos:[]; if(h.length) progs.push(Math.round(h.filter(x=>x.hecho).length/h.length*100)); });
+    projs.forEach(pr=>{ const h=(Array.isArray(pr.hitos)?pr.hitos:[]).filter(x=>!x.cancelado); if(h.length) progs.push(Math.round(h.filter(x=>x.hecho).length/h.length*100)); });
 
     const gprAvance = progs.length? Math.round(progs.reduce((a,b)=>a+b,0)/progs.length) : null;
 
